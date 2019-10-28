@@ -1,11 +1,9 @@
+
 import os
 import platform
-import datetime
 import sys
+from datetime import datetime
 
-
-assert sys.argv[1] is not None, 'Usage: python datetime_filename.py folderpath'
-directory_path = sys.argv[1]
 
 # import pathlib
 # print(pathlib.Path('yourPathGoesHere').suffix)
@@ -29,13 +27,13 @@ def get_creation_timestamp(path_to_file):
             return stat.st_mtime
 
 
-def get_creation_date(filename):
-    t = get_creation_timestamp(filename)
-    return datetime.datetime.fromtimestamp(t)
+def get_creation_date(filepath: str):
+    t = get_creation_timestamp(filepath)
+    return datetime.fromtimestamp(t)
 
 
-def format_datettime(datetime) -> str:
-	return f'{datetime.year}.{datetime.month:02}.{datetime.day:02} {datetime.hour:02}{datetime.minute:02}'
+def format_datettime(d: datetime) -> str:
+	return f'{d.year}.{d.month:02}.{d.day:02} {d.hour:02}{d.minute:02}'
 
 
 def rename_file(directory_path: str, filename: str):
@@ -46,5 +44,10 @@ def rename_file(directory_path: str, filename: str):
     os.rename(path_to_file, path_to_output)
 
 
-for old_file_name in os.listdir(directory_path):
-    rename_file(directory_path, old_file_name)
+if __name__ == "__main__":
+    error_message = 'Usage: python datetime_filename.py folderpath'
+    assert sys.argv[1] is not None, error_message
+    directory_path = sys.argv[1]
+
+    for old_file_name in os.listdir(directory_path):
+        rename_file(directory_path, old_file_name)
