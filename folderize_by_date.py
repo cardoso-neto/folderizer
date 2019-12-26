@@ -34,12 +34,12 @@ def parse_args():
     return args
 
 
-def get_all_filepaths(folder_path: Path):
+def get_all_filepaths(folder_path: Path) -> List[Path]:
     """
-    Return a list with everything under folder/
+    Return a list with every file under folder_path
     """
-    # What if there are subdirectories
-    # should we explore them or ignore them? 
+    # What if there are subdirectories? explore or ignore?
+    # return [x for x in folder_path.iterdir() if x.is_file()]
     return list(filter(methodcaller("is_file"), folder_path.iterdir()))
 
 
