@@ -1,5 +1,6 @@
 
 import argparse
+import subprocess
 from datetime import datetime
 from operator import methodcaller
 from pathlib import Path
@@ -30,9 +31,15 @@ def parse_args():
         type=Path,
         help='Folder where the files are located',
     )
+    parser.add_argument(
+        '--git',
+        action="store_true",
+        help='Signal whether the files are inside a git repo.',
+    )
     args = parser.parse_args()
     return args
-
+import subprocess
+subprocess.run(["ls", "-l"])
 
 def get_all_filepaths(folder_path: Path) -> List[Path]:
     """
@@ -52,15 +59,38 @@ def year_month(x: datetime):
     return f"{x.year}.{x.month:02}"
 
 
+from contextlib import contextmanager
+import os
+
+@contextmanager
+def chcwd(newdir: Path):
+    if not newdir.is_dir():
+        raise ValueError("Folder does not exist.")
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
+
+
+def git_mv(src: str, dst: str):
+    subprocess.run(
+        ["git", "mv", str(file_path), str(new_file_path)]
+    )
+
+
 if __name__ == "__main__":
     args = parse_args()
+    move_function = git_mv if args.git else move
     files = get_all_filepaths(args.folder)
     datetime_objs = list(map(get_creation_date, files))
     folders = set(map(year_month, datetime_objs))
     create_dirs(map(args.folder.joinpath, folders))
-    for file_path, creation_date in zip(files, datetime_objs):
-        new_file_path = args.folder.joinpath(
-            year_month(creation_date),
-            file_path.name,
-        )
-        move(str(file_path), str(new_file_path))
+    with chcwd(args.folder):
+        for file_path, creation_date in zip(files, datetime_objs):
+            new_file_path = args.folder.joinpath(
+                year_month(creation_date),
+                file_path.name,
+            )
+            move_function(str(file_path), str(new_file_path))
