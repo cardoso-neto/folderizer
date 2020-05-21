@@ -1,14 +1,16 @@
 
 import argparse
+import os
 import subprocess
+from contextlib import contextmanager
 from datetime import datetime
 from operator import methodcaller
 from pathlib import Path
 from shutil import move
-from typing import Iterable
+from typing import List, Iterable
 
 from rename_with_datetime import get_creation_date
-
+from utils import create_dirs, git_mv
 
 # modes
 # flat tree (by month)
@@ -16,6 +18,7 @@ from rename_with_datetime import get_creation_date
 # deep tree
 # 2018/2018.11/ 2018/2018.12/ 2019/2019.01
 
+# algo
 # determine which datetime element to use
 # get all unique folders to create
 # create them
@@ -38,46 +41,31 @@ def parse_args():
     )
     args = parser.parse_args()
     return args
-import subprocess
-subprocess.run(["ls", "-l"])
+
 
 def get_all_filepaths(folder_path: Path) -> List[Path]:
     """
     Return a list with every file under folder_path
     """
-    # What if there are subdirectories? explore or ignore?
-    # return [x for x in folder_path.iterdir() if x.is_file()]
+    # TODO: What if there are subdirectories? explore or ignore?
+    # equiv: return [x for x in folder_path.iterdir() if x.is_file()]
     return list(filter(methodcaller("is_file"), folder_path.iterdir()))
-
-
-def create_dirs(directories: Iterable[Path]):
-    for directory_path in directories:
-        directory_path.mkdir(parents=True, exist_ok=True)
 
 
 def year_month(x: datetime):
     return f"{x.year}.{x.month:02}"
 
 
-from contextlib import contextmanager
-import os
-
 @contextmanager
 def chcwd(newdir: Path):
     if not newdir.is_dir():
-        raise ValueError("Folder does not exist.")
-    prevdir = os.getcwd()
-    os.chdir(os.path.expanduser(newdir))
+        raise ValueError(f"Folder {newdir!r} does not exist.")
+    prevdir = Path.cwd()
+    os.chdir(newdir.expanduser())
     try:
         yield
     finally:
         os.chdir(prevdir)
-
-
-def git_mv(src: str, dst: str):
-    subprocess.run(
-        ["git", "mv", str(file_path), str(new_file_path)]
-    )
 
 
 if __name__ == "__main__":
