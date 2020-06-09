@@ -17,4 +17,4 @@ Recursively select all files below a given folder and move them to the root of t
 Get all files inside a folder (non-recursively) and change their names to their creation date in the format: `yyyy.mm.dd HHmm.ext`
 
 ## CLI
-This is very work-in-progress,. but you can use it `python script-name.py --help` to check which arguments you need. 
+This is very work-in-progress, but you can use `python script-name.py --help` to check which arguments you need. 
